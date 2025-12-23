@@ -123,7 +123,7 @@ const Dashboard: React.FC = () => {
         </div>
         <button
           onClick={logout}
-          className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors font-medium border border-transparent hover:border-red-100"
+          className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors font-medium border border-transparent hover:border-red-100 cursor-pointer"
         >
           <LogOut size={20} /> Logout
         </button>
@@ -195,7 +195,7 @@ const Dashboard: React.FC = () => {
               <code className="text-sm truncate font-mono">.../login?ref={user?.username}</code>
               <button
                 onClick={copyReferralLink}
-                className="p-2 bg-white text-indigo-600 rounded-lg hover:bg-blue-50 transition-colors shrink-0 shadow-lg"
+                className="p-2 bg-white text-indigo-600 rounded-lg hover:bg-blue-50 cursor-pointer transition-colors shrink-0 shadow-lg"
               >
                 <Share2 size={20} />
               </button>
@@ -210,18 +210,18 @@ const Dashboard: React.FC = () => {
             <div className="flex border-b border-gray-100 bg-gray-50/50">
               <button
                 onClick={() => setActiveTab('summary')}
-                className={`flex-1 py-4 flex items-center justify-center gap-2 font-bold transition-all ${activeTab === 'summary'
-                    ? 'bg-white text-indigo-600 border-b-2 border-indigo-600'
-                    : 'text-gray-400 hover:text-gray-600'
+                className={`flex-1 py-4 flex items-center justify-center gap-2 font-bold cursor-pointer transition-all ${activeTab === 'summary'
+                  ? 'bg-white text-indigo-600 border-b-2 border-indigo-600'
+                  : 'text-gray-400 hover:text-gray-600'
                   }`}
               >
                 <LayoutList size={18} /> Summary View
               </button>
               <button
                 onClick={() => setActiveTab('tree')}
-                className={`flex-1 py-4 flex items-center justify-center gap-2 font-bold transition-all ${activeTab === 'tree'
-                    ? 'bg-white text-indigo-600 border-b-2 border-indigo-600'
-                    : 'text-gray-400 hover:text-gray-600'
+                className={`flex-1 py-4 flex items-center justify-center gap-2 font-bold cursor-pointer transition-all ${activeTab === 'tree'
+                  ? 'bg-white text-indigo-600 border-b-2 border-indigo-600'
+                  : 'text-gray-400 hover:text-gray-600'
                   }`}
               >
                 <GitBranch size={18} /> Network Tree
