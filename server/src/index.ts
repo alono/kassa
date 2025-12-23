@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import { getDb } from './models/schema.js';
-import { User, Donation, UserSummary, LevelSummary } from './types/index.js';
+import { User, Donation, UserSummary, LevelSummary, TreeNode } from './types/index.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -107,12 +107,31 @@ app.get('/api/users/summary/:username', async (req, res) => {
     level++;
   }
 
+  // Build tree recursively
+  async function buildTree(userId: number, username: string): Promise<TreeNode> {
+    const userDonations = await db.get('SELECT SUM(amount) as total FROM donations WHERE user_id = ?', [userId]);
+    const children = await db.all('SELECT id, username FROM users WHERE referrer_id = ?', [userId]);
+
+    const childNodes = await Promise.all(
+      children.map(child => buildTree(child.id, child.username))
+    );
+
+    return {
+      username,
+      totalDonated: userDonations?.total || 0,
+      children: childNodes
+    };
+  }
+
+  const tree = await buildTree(user.id, user.username);
+
   const summary: UserSummary = {
-    referralLink: `${username}`, // Just the username for now, frontend will prepend its own URL
+    referralLink: `${username}`,
     userTotalDonated,
     descendantsTotalDonated,
     totalDescendants,
-    levels
+    levels,
+    tree
   };
 
   res.json(summary);
