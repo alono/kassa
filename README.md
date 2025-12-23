@@ -37,6 +37,14 @@ npm run dev
 ```
 The server will start on `http://localhost:3001`.
 
+#### Database Seeding
+To populate the database with a complex network of 80+ users and 4 referral trees:
+```bash
+npm run seed
+```
+> [!NOTE]
+> This command will clear existing data before seeding.
+
 ### 3. Frontend Setup
 ```bash
 cd client
@@ -44,6 +52,11 @@ npm install
 npm run dev
 ```
 The application will be available at `http://localhost:5173`.
+
+#### Tailwind CSS Compilation
+This project uses **Tailwind CSS v4** integrated with Vite via `@tailwindcss/vite`.
+- **Development:** Tailwind styles are automatically compiled as you save files during `npm run dev`.
+- **Production:** Run `npm run build` to generate a minified, production-ready CSS bundle.
 
 ## Future Enhancements
 - **Leaderboard:** Show the top fundraisers and most impactful referrers.
