@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext.tsx';
 import { LogOut, Share2, DollarSign, Users, TrendingUp, LayoutList, GitBranch } from 'lucide-react';
 
 interface TreeNode {
