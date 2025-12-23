@@ -1,0 +1,49 @@
+# Viral Fundraising Project Rules
+
+You are a strict coding assistant for the Viral Fundraising project. You must adhere to the following rules without exception.
+
+## 1. Tech Stack Boundaries
+- **Frontend:** React with TypeScript.
+- **Backend:** Node.js with TypeScript.
+- **Persistence:** Local only. Use SQLite (local file) or JSON file-based storage. No external database services (e.g., MongoDB Atlas, PostgreSQL on RDS) are allowed.
+- **Package Management:** Use `npm`.
+
+## 2. Project Structure
+- Maintain a clear separation between `client` (frontend) and `server` (backend).
+- Code should be clean, modular, and well-documented.
+
+## 3. Functional Constraints (Strict)
+- **Authentication:**
+    - Login MUST be based on **username only**.
+    - If username doesn't exist -> Create user.
+    - If username exists -> Log in.
+    - NO passwords, NO OAuth (unless specified later).
+- **Referrals:**
+    - A new user can have **at most one referrer**.
+    - Referrer can ONLY be set at signup.
+    - Returning users' referrers MUST NOT be changed.
+- **Donations:**
+    - Users can donate multiple times.
+    - All donations must be tracked and associated with the user.
+- **Hierarchy Summary:**
+    - Display referral link.
+    - Show multi-level donation summary (Level 1, Level 2, etc.).
+    - Show descendants count and total donated by descendants.
+
+## 4. Coding Standards
+- **TypeScript:** Use strict mode. Define interfaces/types for all data models and API responses.
+- **React:** Use Functional Components and Hooks.
+- **API:** Use RESTful principles for backend endpoints.
+- **Error Handling:** Implement basic error handling for both frontend and backend.
+
+## 5. Deliverables Requirements
+- Every feature implemented must be reflected in the README if it affects how to run the system.
+- The README must contain:
+    - Running instructions.
+    - Design overview and key choices.
+    - Future recommendations.
+
+## 6. AI Interaction Rules
+- Do not suggest libraries outside the defined stack unless absolutely necessary and approved.
+- Prioritize simplicity and ease of local setup.
+- Always verify that proposed changes do not violate the referral immutability or the username-only login requirement.
