@@ -1,80 +1,89 @@
 import { Request, Response } from 'express';
 import { getDb } from '../models/schema.js';
 import { UserSummary, LevelSummary, TreeNode } from '../types/index.js';
+import { logger } from '../utils/logger.js';
 
 export const getSummary = async (req: Request, res: Response) => {
   const { username } = req.params;
-  const db = await getDb();
 
-  const user = await db.get('SELECT id, username FROM users WHERE username = ?', [username]);
-  if (!user) {
-    return res.status(404).json({ error: 'User not found' });
-  }
+  try {
+    const db = await getDb();
+    const user = await db.get('SELECT id, username FROM users WHERE username = ?', [username]);
+    if (!user) {
+      logger.warn(`Summary requested for non-existent user: ${username}`);
+      return res.status(404).json({ error: 'User not found' });
+    }
 
-  // Get user's own total donations
-  const userDonationRes = await db.get('SELECT SUM(amount) as total FROM donations WHERE user_id = ?', [user.id]);
-  const userTotalDonated = userDonationRes?.total || 0;
+    logger.info(`Fetching summary for user: ${username}`);
 
-  // BFS approach to find all descendants by level
-  let levels: LevelSummary[] = [];
-  let currentLevelUserIds = [user.id];
-  let totalDescendants = 0;
-  let descendantsTotalDonated = 0;
+    // Get user's own total donations
+    const userDonationRes = await db.get('SELECT SUM(amount) as total FROM donations WHERE user_id = ?', [user.id]);
+    const userTotalDonated = userDonationRes?.total || 0;
 
-  let level = 1;
-  while (currentLevelUserIds.length > 0) {
-    const nextLevelUsers = await db.all(
-      `SELECT id FROM users WHERE referrer_id IN (${currentLevelUserIds.join(',')})`
-    );
+    // BFS approach to find all descendants by level
+    let levels: LevelSummary[] = [];
+    let currentLevelUserIds = [user.id];
+    let totalDescendants = 0;
+    let descendantsTotalDonated = 0;
 
-    if (nextLevelUsers.length === 0) break;
+    let level = 1;
+    while (currentLevelUserIds.length > 0) {
+      const nextLevelUsers = await db.all(
+        `SELECT id FROM users WHERE referrer_id IN (${currentLevelUserIds.join(',')})`
+      );
 
-    const nextLevelIds = nextLevelUsers.map((u: any) => u.id);
-    const donationRes = await db.get(
-      `SELECT SUM(amount) as total FROM donations WHERE user_id IN (${nextLevelIds.join(',')})`
-    );
+      if (nextLevelUsers.length === 0) break;
 
-    const levelTotalDonated = donationRes?.total || 0;
+      const nextLevelIds = nextLevelUsers.map((u: any) => u.id);
+      const donationRes = await db.get(
+        `SELECT SUM(amount) as total FROM donations WHERE user_id IN (${nextLevelIds.join(',')})`
+      );
 
-    levels.push({
-      level,
-      userCount: nextLevelIds.length,
-      totalDonated: levelTotalDonated
-    });
+      const levelTotalDonated = donationRes?.total || 0;
 
-    totalDescendants += nextLevelIds.length;
-    descendantsTotalDonated += levelTotalDonated;
+      levels.push({
+        level,
+        userCount: nextLevelIds.length,
+        totalDonated: levelTotalDonated
+      });
 
-    currentLevelUserIds = nextLevelIds;
-    level++;
-  }
+      totalDescendants += nextLevelIds.length;
+      descendantsTotalDonated += levelTotalDonated;
 
-  // Build tree recursively
-  async function buildTree(userId: number, username: string): Promise<TreeNode> {
-    const userDonations = await db.get('SELECT SUM(amount) as total FROM donations WHERE user_id = ?', [userId]);
-    const children = await db.all('SELECT id, username FROM users WHERE referrer_id = ?', [userId]);
+      currentLevelUserIds = nextLevelIds;
+      level++;
+    }
 
-    const childNodes = await Promise.all(
-      children.map((child: any) => buildTree(child.id, child.username))
-    );
+    // Build tree recursively
+    async function buildTree(userId: number, username: string): Promise<TreeNode> {
+      const userDonations = await db.get('SELECT SUM(amount) as total FROM donations WHERE user_id = ?', [userId]);
+      const children = await db.all('SELECT id, username FROM users WHERE referrer_id = ?', [userId]);
 
-    return {
-      username,
-      totalDonated: userDonations?.total || 0,
-      children: childNodes
+      const childNodes = await Promise.all(
+        children.map((child: any) => buildTree(child.id, child.username))
+      );
+
+      return {
+        username,
+        totalDonated: userDonations?.total || 0,
+        children: childNodes
+      };
+    }
+
+    const tree = await buildTree(user.id, user.username);
+
+    const summary: UserSummary = {
+      referralLink: `${username}`,
+      userTotalDonated,
+      descendantsTotalDonated,
+      totalDescendants,
+      levels,
+      tree
     };
+
+    res.json(summary);
+  } catch (error) {
+    logger.error({ error }, `Error fetching summary for ${username}:`);
+    res.status(500).json({ error: 'Internal server error' });
   }
-
-  const tree = await buildTree(user.id, user.username);
-
-  const summary: UserSummary = {
-    referralLink: `${username}`,
-    userTotalDonated,
-    descendantsTotalDonated,
-    totalDescendants,
-    levels,
-    tree
-  };
-
-  res.json(summary);
 };
