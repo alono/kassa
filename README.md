@@ -21,7 +21,8 @@ A full-stack web application that simulates a viral charity fundraising mechanis
 1. **SQLite for Persistence:** Provides a robust, single-file database that requires zero configuration for the end-user.
 2. **Recursive Summary Logic:** The backend uses a BFS approach to traverse the referral tree and calculate multi-level statistics efficiently for small-to-medium datasets.
 3. **Tailwind CSS v4:** Leverages the latest styling capabilities for a premium, responsive look with minimal bundle size.
-4. **AuthContext & React Router:** Ensures a smooth, single-page application experience with protected routes.
+4. **Pino Logger:** Replaced Winston with Pino for high-performance, structured JSON logging. Integrated with `pino-http` for concise request visibility and `pino-pretty` for readable development output.
+5. **AuthContext & React Router:** Ensures a smooth, single-page application experience with protected routes.
 
 ## Getting Started
 
